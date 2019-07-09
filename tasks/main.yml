@@ -1,0 +1,48 @@
+---
+
+- name: Certbot PPA present
+  apt_repository:
+    repo: ppa:certbot/certbot
+    filename: certbot
+    state: present
+    update_cache: true
+
+- name: Certbot nginx package is installed
+  # apt: pkg=python-certbot-apache state=present
+  apt: pkg=python-certbot-nginx state=present
+
+- name: Staple OCSP is allowed
+  lineinfile:
+    path: /etc/letsencrypt/cli.ini
+    regexp: "^staple-ocsp"
+    line: "staple-ocsp = True"
+
+- name: Must Staple is allowed
+  lineinfile:
+    path: /etc/letsencrypt/cli.ini
+    regexp: "^must-staple"
+    line: "must-staple = False"
+
+- name: Certificate renew is presnet in crontab
+  cron:
+    name: Obnova LE SSl certifikatu v 1:00
+    minute: 0
+    hour: 1
+    job: /usr/bin/certbot renew --disable-renew-updates --quiet
+
+- name: Certificates are present
+  # command: "certbot --noninteractive --agree-tos --email {{ admin_email }} --apache certonly -d {{ item }}"
+  command: "certbot --noninteractive --agree-tos --email {{ admin_email }} --nginx certonly -d {{ item }}"
+  args:
+    creates: /etc/letsencrypt/live/{{ item.split(',')[0] }}/cert.pem
+  with_items: "{{ certbot_certificates }}"
+  when: certbot_certificates is defined
+
+#ssl_certificate          /etc/letsencrypt/live/d/fullchain.pem;
+#ssl_certificate_key      /etc/letsencrypt/live/d/privkey.pem;
+#ssl_trusted_certificate  /etc/letsencrypt/live/d/chain.pem;
+#add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload' always;
+
+#SSLEngine on
+#SSLCertificateFile /etc/letsencrypt/live/d/fullchain.pem
+#SSLCertificateKeyFile /etc/letsencrypt/live/d/privkey.pem
