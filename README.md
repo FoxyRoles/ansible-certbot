@@ -1,4 +1,4 @@
-# ansible-nginx
+# ansible-certbot
 
 Setups Certbot for Let's Encrypt SSL certificate generation.
 
