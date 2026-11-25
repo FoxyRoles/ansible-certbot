@@ -1,13 +1,24 @@
 ---
-- name: Gather the package facts
-  package_facts:
-    manager: auto
+- name: Check which packages Certbot can use
+  ansible.builtin.command:
+    argv:
+      - dpkg-query
+      - --show
+      - '--showformat=${Package} ${db:Status-Status}\n'
+      - snapd
+      - apache2
+      - nginx-common
+    expand_argument_vars: false
+  register: certbot_packages
+  failed_when: certbot_packages.rc not in [0, 1]
+  changed_when: false
+  check_mode: false
 
 - name: Package snapd is present
   apt:
     pkg: snapd
     state: present
-  when: "'snapd' not in ansible_facts.packages"
+  when: "'snapd installed' not in certbot_packages.stdout_lines"
 
 - name: Snap package certbot is present
   snap:
@@ -16,14 +27,13 @@
     classic: true
 
 - set_fact: certbot_plugin="--apache"
-  when: "'apache2' in ansible_facts.packages"
+  when: "'apache2 installed' in certbot_packages.stdout_lines"
 
 - set_fact: certbot_plugin="--nginx"
-  when: "'nginx-common' in ansible_facts.packages"
+  when: "'nginx-common installed' in certbot_packages.stdout_lines"
 
 - name: Certificates are present
   command: "certbot --noninteractive --agree-tos --email {{ admin_email }} {{ certbot_plugin }} certonly -d {{ item }}"
   args:
     creates: /etc/letsencrypt/live/{{ item.split(',')[0] }}/cert.pem
-  with_items: "{{ certbot_certificates }}"
-  when: certbot_certificates is defined
+  loop: "{{ certbot_certificates | default([]) | flatten(1, skip_nulls=false) }}"
