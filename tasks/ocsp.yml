@@ -1,10 +1,10 @@
 ---
 
-- name: Staple OCSP is allowed
+- name: Staple OCSP is disallowed
   lineinfile:
     path: /etc/letsencrypt/cli.ini
     regexp: "^staple-ocsp"
-    line: "staple-ocsp = True"
+    line: "staple-ocsp = False"
 
 - name: Must Staple is disallowed
   lineinfile:

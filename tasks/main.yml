@@ -3,26 +3,23 @@
   package_facts:
     manager: auto
 
-- name: Certbot PPA present
-  apt_repository:
-    repo: ppa:certbot/certbot
-    filename: certbot
+- name: Package snapd is present
+  apt:
+    pkg: snapd
     state: present
-    update_cache: true
-  when: ansible_distribution_version in ["16.04", "18.04"]
+  when: "'snapd' not in ansible_facts.packages"
 
-- import_tasks: install_apache.yml
+- name: Snap package certbot is present
+  snap:
+    name: certbot
+    state: present
+    classic: true
+
+- set_fact: certbot_plugin="--apache"
   when: "'apache2' in ansible_facts.packages"
 
-- import_tasks: install_nginx.yml
+- set_fact: certbot_plugin="--nginx"
   when: "'nginx-common' in ansible_facts.packages"
-
-- name: Certificate renew present in crontab
-  cron:
-    name: LE SSL renew at 1:00
-    minute: "0"
-    hour: "1"
-    job: /usr/bin/certbot renew --disable-renew-updates --quiet
 
 - name: Certificates are present
   command: "certbot --noninteractive --agree-tos --email {{ admin_email }} {{ certbot_plugin }} certonly -d {{ item }}"
@@ -30,14 +27,3 @@
     creates: /etc/letsencrypt/live/{{ item.split(',')[0] }}/cert.pem
   with_items: "{{ certbot_certificates }}"
   when: certbot_certificates is defined
-
-# apache zone config
-# SSLEngine on
-# SSLCertificateFile /etc/letsencrypt/live/d/fullchain.pem
-# SSLCertificateKeyFile /etc/letsencrypt/live/d/privkey.pem
-
-# nginx zone config
-# ssl_certificate          /etc/letsencrypt/live/d/fullchain.pem;
-# ssl_certificate_key      /etc/letsencrypt/live/d/privkey.pem;
-# ssl_trusted_certificate  /etc/letsencrypt/live/d/chain.pem;
-# add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload' always;
