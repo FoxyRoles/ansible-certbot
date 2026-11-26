@@ -2,15 +2,16 @@
 
 Setups Certbot for Let's Encrypt SSL certificate generation.
 
-Work both for apache2 and nginx.
+The role selects Nginx or Apache from installed packages and prefers Nginx
+when both are installed. Set `certbot_plugin` to override the choice or to
+run without either web server, for example with `--standalone`.
 
 ## Example playbook
 
 ```yaml
 ---
 - hosts: myserver
-  user: root
-  sudo: False
+  remote_user: root
   roles:
    - sunfoxcz.certbot
      admin_email: my@domain.tld
