@@ -1,13 +1,13 @@
 ---
 
 - name: Staple OCSP is disallowed
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/letsencrypt/cli.ini
     regexp: "^staple-ocsp"
     line: "staple-ocsp = False"
 
 - name: Must Staple is disallowed
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/letsencrypt/cli.ini
     regexp: "^must-staple"
     line: "must-staple = False"

@@ -6,6 +6,11 @@ The role selects Nginx or Apache from installed packages and prefers Nginx
 when both are installed. Set `certbot_plugin` to override the choice or to
 run without either web server, for example with `--standalone`.
 
+## Requirements
+
+- `ansible-core` 2.19 or newer.
+- The `community.general` collection.
+
 ## Example playbook
 
 ```yaml
@@ -13,11 +18,11 @@ run without either web server, for example with `--standalone`.
 - hosts: myserver
   remote_user: root
   roles:
-   - sunfoxcz.certbot
-     admin_email: my@domain.tld
-     certbot_certificates:
-       - domain1.tld,www.domain1.tld
-       - sub.domain2.tld
+    - role: sunfoxcz.certbot
+      admin_email: my@domain.tld
+      certbot_certificates:
+        - domain1.tld,www.domain1.tld
+        - sub.domain2.tld
 ```
 
 ## Apache zone config

@@ -1,0 +1,27 @@
+---
+
+galaxy_info:
+  namespace: sunfoxcz
+  role_name: certbot
+  author: Tomas Jacik
+  description: Install Certbot and issue Let’s Encrypt certificates.
+  company: sunfoxcz
+  license: MIT
+  min_ansible_version: '2.19'
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+        - trixie
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+        - resolute
+  galaxy_tags:
+    - certbot
+    - acme
+    - tls
+
+dependencies: []
